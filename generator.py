@@ -1,4 +1,5 @@
 # import required libraries
+import numpy as np
 import os
 import tensorflow as tf
 
@@ -116,11 +117,11 @@ def unnormalize(image):
     image = (image + 1) * 127.5
     return image
 
-def save_image(image, filename, height, width):
+def save_image(image, download_path, filename, height, width):
     image = resize(image, height, width)
     image = tf.cast(unnormalize(image), tf.uint8)
     image = tf.image.encode_png(image)
-    tf.io.write_file(app.config['DOWNLOAD_FOLDER'] + filename, image)
+    tf.io.write_file(os.path.join(download_path, filename), image)
     return image
 
 def generate_image(model, input):
@@ -145,7 +146,12 @@ def process_image(image):
     image = np.float32(normalize(image))[:,:,:3]
     return image, height, width
 
-def process_file(path, filename):
-    image, height, width = process_image(os.path.join(path, filename))
-    image = generate_image(new_generator, tf.expand_dims(image, 0))
-    save_image(image, filename, height, width)
+def process_file(upload_path, download_path, filename):
+    image, height, width = process_image(os.path.join(upload_path, filename))
+    image = generate_image(generator, tf.expand_dims(image, 0))
+    save_image(image, download_path, filename, height, width)
+	
+
+# initialize generator model instance
+generator = buildGenerator()
+generator.load_weights('AnimeColourisationModel.h5')

@@ -1,6 +1,6 @@
 # import required libraries
 from flask import Flask, request, redirect, url_for, render_template, send_from_directory
-from generator import buildGenerator, process_file
+from generator import process_file
 from werkzeug.utils import secure_filename
 
 import os
@@ -8,10 +8,6 @@ import os
 
 # initialize app instance
 app = Flask(__name__, static_url_path='/static')
-
-# initialize generator model instance
-generator = buildGenerator()
-generator.load_weights('AnimeColourisationModel.h5')
 
 # file upload configurations
 UPLOAD_FOLDER = os.path.dirname(os.path.abspath(__file__)) + '/uploads/'
@@ -43,7 +39,7 @@ def index():
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            process_file(os.path.join(app.config['UPLOAD_FOLDER'], filename), filename)
+            process_file(app.config['UPLOAD_FOLDER'], app.config['DOWNLOAD_FOLDER'], filename)
             return redirect(url_for('uploaded_file', filename=filename))
     return render_template('index.html')
     
